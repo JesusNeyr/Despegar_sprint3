@@ -16,7 +16,30 @@ productos = [
 
 ventas = []
 
-class Producto:
+class Sucursal:
+    def __init__(self) :
+        self.productos = []
+        self.ventas = []
+
+
+    def registrar_producto(self,producto_nuevo):
+ 
+        if "codigo" not in producto_nuevo and "stock" in producto_nuevo:
+            raise ValueError("no se encotro codigo, no incializar stock ")       
+        if len(productos)==0:
+            producto_nuevo["stock"]=0
+            productos.append(producto_nuevo)
+        else:
+            for producto in productos:
+                    
+                if producto_nuevo["codigo"]==producto["codigo"]:
+                    raise ValueError("producto registrado")
+            producto_nuevo["stock"]=0
+            productos.append(producto_nuevo)
+            
+
+
+class Producto(Sucursal):
     def __init__(self, nombre, categoria, codigo, precio_base):
         self.nombre = nombre
         self.categoria = categoria
@@ -26,9 +49,18 @@ class Producto:
 
     def precio(self):
         return self.estado.precio(self.precio_base)
+
 #Liquidacion().precio(5000)
+
     def cambiar_estado(self, estado):
         self.estado = estado
+
+    def consultar_categoria(self,consultar_categoria):
+        return consultar_categoria in self.categoria
+
+    def agregar_categoria(self,nueva_categoria):
+        self.categoria.append(nueva_categoria) 
+
 
 
 class Nueva:
@@ -46,7 +78,7 @@ class Promocion:
     def precio(self, precio_base):
         return precio_base - self.valor_fijo
 
-# class Sucursal:
+
 
 
 
@@ -168,23 +200,23 @@ class Promocion:
 #     else:
 #         raise ValueError("Codigo no encontrado")
     
-def realizar_compra(codigo_producto, cantidad):
+# def realizar_compra(codigo_producto, cantidad):
     
     
-    global ventas
+#     global ventas
     
-    lista_de_codigos = lista_de_codigos_productos()
+#     lista_de_codigos = lista_de_codigos_productos()
     
-    posicion=posicion_de_codigo_ordenado_decre_de_productos(codigo_producto)
+#     posicion=posicion_de_codigo_ordenado_decre_de_productos(codigo_producto)
     
-    if hay_stock(codigo_producto) and cantidad <= productos[posicion]["stock"]:
+#     if hay_stock(codigo_producto) and cantidad <= productos[posicion]["stock"]:
         
-            productos[posicion]["stock"]-= cantidad
+#             productos[posicion]["stock"]-= cantidad
             
-            realizar_venta(productos[posicion],cantidad)
+#             realizar_venta(productos[posicion],cantidad)
             
-    else:
-            raise ValueError("No hay stock Disponible, cantidad dispoble de " + str(productos[posicion]["stock"]) )
+#     else:
+#             raise ValueError("No hay stock Disponible, cantidad dispoble de " + str(productos[posicion]["stock"]) )
         
 # def discontinuar_productos():
     
