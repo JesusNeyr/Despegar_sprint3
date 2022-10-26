@@ -12,11 +12,7 @@ from tokenize import Number
 fecha_anio_actual=date.strftime(date.today(), "%Y")
 dia =date.strftime(date.today(), "%Y-%m-%d")
 
-productos = [
 
-]
-
-ventas = []
 
 class Producto:
     def __init__(self, nombre, categoria, codigo, precio_base):
@@ -60,10 +56,7 @@ class Producto:
     #aca van los metodos 
     # y en cada clase de sucursal va a ir su constructor
 class Sucursal:
-    def __init__(self) :
-        self.productos = []
-        self.ventas = []
-        self.gastos_de_dia=500
+    
         # self.producto=Producto()
     
     def codigos_productos(self):
@@ -200,9 +193,9 @@ class Sucursal:
         
         for venta in self.ventas:
             
-            if venta.fecha== dia:
+            if venta["fecha"]== dia:
                 
-                suma_ventas += venta.precio
+                suma_ventas += venta["precio"]
                 
         return suma_ventas
     def ventas_del_anio(self):
@@ -288,9 +281,29 @@ class Sucursal:
 
 
 class Sucursalvirtual(Sucursal):
+    def __init__(self) :
+        self.productos = []
+        self.ventas = []
+        # self.gastos_de_dia 
 
-    pass
+    def cantidad_de_ventas_del_dia(self):
+        self.ventas
+        ventas_por_dia= [venta for venta in self.ventas if dia in venta["fecha"]]
+        return len(ventas_por_dia)
 
+    def gastos_por_dia(self,gasto_variable):
+        if Sucursalvirtual.cantidad_de_ventas_del_dia(self) > 2:
+            return Sucursalvirtual.cantidad_de_ventas_del_dia(self) * gasto_variable
+        else:
+            return gasto_variable
+
+    def ganancias_total_por_dia(self):
+        return Sucursalvirtual.valor_ventas_del_dia(self) - Sucursalvirtual.gastos_por_dia(self,500)
+    
+   
+
+        
+    
 
 class Nueva:
     def precio(self, precio_base):
@@ -307,18 +320,33 @@ class Promocion:
     def precio(self, precio_base):
         return precio_base - self.valor_fijo
 
+macowin = Sucursalvirtual()
+pantalon= Producto("pantalon","ropa",100,5000)
+remera = Producto("remera", "ropa", 101, 2000)
+short = Producto("short","ropa",102,1000)
+macowin.registrar_producto(pantalon)
+macowin.registrar_producto(remera)
+macowin.registrar_producto(short)
+macowin.recargar_stock(100,20)
+macowin.recargar_stock(101,20)
+macowin.recargar_stock(102,20)
+macowin.realizar_compra(100,1)
+macowin.realizar_compra(101,1)
+macowin.realizar_compra(102,1)
+print(macowin.gastos_por_dia(500))    
+print(macowin.ganancias_total_por_dia())
 
-collar=Producto("collar","accesorio",123,1234)
-p=Sucursal()
-p.registrar_producto(collar)
-p.mostrar()
-print("-----------------")
-pantalon=Producto("pantalon","ropa",324,87687)
-p.registrar_producto(pantalon)
-p.mostrar()
-p.productos
+# collar=Producto("collar","accesorio",123,1234)
+# p=Sucursal()
+# p.registrar_producto(collar)
+# p.mostrar()
+# print("-----------------")
+# pantalon=Producto("pantalon","ropa",324,87687)
+# p.registrar_producto(pantalon)
+# p.mostrar()
+# p.productos
 
-p.hay_stock(324)
+# p.hay_stock(324)
 
 
 
