@@ -34,9 +34,10 @@ class Producto:
         return self.codigo
 
     def consultar_categoria(self,consultar_categoria):
-        return consultar_categoria in self.categoria
+        return consultar_categoria.lower() in self.categoria
 
     def agregar_categoria(self,nueva_categoria):
+        #hacer un for y retornar true o false, aplicar lower a la variable de parametro y al atributo
         self.categoria.append(nueva_categoria)
     def retornar_precio(self):
         return self.precio_base
@@ -49,6 +50,25 @@ class Producto:
         else:
             
             return self.precio(self) + self.precio(self) * 0.21
+
+    def actualizar_precio_(self,porcentaje):
+        self.precio_base +=self.precio_base*porcentaje/100
+
+    #crear actualizar_precio_por_nombre(), recibe nombre y porcentaje
+        #hace lo mismo que actualizar asi que se copia
+     
+    # ojo que si vemos estos dos metodos son iguales asi que seria mejor hace un 
+    #actualizar_segun_critero(), recibiendo un criterio  y un %
+    #dentro se mapea y se filtra
+#estos criterios seran clases, por nombre y por categoria
+#enviando el msj si corresponde al producto
+#en nombre, se hace el constructor de nombre donde estara la expresion regular
+#en categoria, los mismo pero tiene un atributo de categoria
+class PorNombre:
+    def __init__(self):
+        pass
+class PorCategoria
+
 
 class Sucursal:
     
@@ -78,6 +98,7 @@ class Sucursal:
     def codigo_de_producto_solicitado_en_productos(self,codigo):
         
         return codigo in self.codigos_productos(self)
+
     def posicion_de_codigo_ordenado_decre_de_productos(self,codigo_de_producto):
 
         if self.codigo_de_producto_solicitado_en_productos(self,codigo_de_producto):
@@ -92,6 +113,7 @@ class Sucursal:
                             return producto
         else:
             raise ValueError("No se encontro el producto")
+
     def registrar_producto(self,producto_nuevo):
      
         if len(self.productos)==0:
@@ -121,6 +143,7 @@ class Sucursal:
                 raise ValueError("No se encuentra el producto")
 
     def hay_stock(self,codigo_producto):
+
     
     
         lista_de_codigos=self.codigos_productos(self)
@@ -131,6 +154,7 @@ class Sucursal:
         if codigo_producto in lista_de_codigos:
 
             return self.productos[posicion].codigo == codigo_producto and self.productos[posicion].stock > 0
+    
     def mostrar(self):
         for i in self.productos:
             print(f'nombre del producto {i.nombre}, stock = {i.stock},codigo = {i.codigo}')
@@ -254,18 +278,21 @@ class Sucursal:
 
     def actualizar_precios_por_categoria(self,categoria, porcentaje):
 
-        if type(porcentaje)==int:
+        for producto in self.productos:
+            if producto.consultar_categoria(categoria):
+                producto.actualizar_precio(porcentaje)
+        # if type(porcentaje)==int:
         
-            for producto in self.productos:
+        #     for producto in self.productos:
 
-                precio_de_producto = producto.retornar_precio()
+        #         precio_de_producto = producto.retornar_precio()
 
-                if producto.categoria == categoria.lower():
+        #         if producto.categoria == categoria.lower():
                     
-                    producto.precio_base = precio_de_producto + ( precio_de_producto * porcentaje/100)
-        else:
+        #             producto.precio_base = precio_de_producto + ( precio_de_producto * porcentaje/100)
+        # else:
 
-            raise ValueError("Porcentaje no recibe cadena de texto, solo numeros")
+        #     raise ValueError("Porcentaje no recibe cadena de texto, solo numeros")
 
 class Sucursalvirtual(Sucursal):
     def __init__(self) :
@@ -290,13 +317,11 @@ class Sucursalvirtual(Sucursal):
     def asignar_valor_gastos_fijo_por_dia(self,valor):
         self.gastos_fijo_por_dia = valor
 
-
 class Sucursalfisica(Sucursal):
     def __init__(self):
         self.productos = []
         self.ventas = [] 
         self.valor_fijo_diario = 500
-
 
 def ganancias_total_por_dia(self):
         return self.valor_ventas_del_dia() - self.valor_fijo_diario
@@ -305,8 +330,6 @@ def cantidad_de_ventas_del_dia(self):
         self.ventas
         ventas_por_dia= [venta for venta in self.ventas if dia in venta["fecha"]]
         return len(ventas_por_dia)
-
-
 
 class Nueva:
     def precio(self, precio_base):
@@ -324,7 +347,7 @@ class Promocion:
         return precio_base - self.valor_fijo
 
 macowin = Sucursalvirtual()
-pantalon= Producto("pantalon","ropa",100,5000)
+pantalon= Producto("pantalon","ROPA",100,5000)
 remera = Producto("remera", "ropa", 101, 2000)
 macowin.registrar_producto(pantalon)
 macowin.registrar_producto(remera)
