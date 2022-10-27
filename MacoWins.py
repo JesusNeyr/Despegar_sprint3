@@ -271,20 +271,42 @@ class Sucursalvirtual(Sucursal):
     def __init__(self) :
         self.productos = []
         self.ventas = [] 
+        self.gastos_fijo_por_dia = 0
 
     def cantidad_de_ventas_del_dia(self):
         self.ventas
         ventas_por_dia= [venta for venta in self.ventas if dia in venta["fecha"]]
         return len(ventas_por_dia)
 
-    def gastos_por_dia(self,gasto_variable):
-        if Sucursalvirtual.cantidad_de_ventas_del_dia(self) > 2:
-            return Sucursalvirtual.cantidad_de_ventas_del_dia(self) * gasto_variable
+    def gastos_por_dia(self):
+        if self.cantidad_de_ventas_del_dia() > 100:
+            return self.cantidad_de_ventas_del_dia() * self.gastos_fijo_por_dia
         else:
-            return gasto_variable
+            return self.gastos_fijo_por_dia
 
     def ganancias_total_por_dia(self):
-        return Sucursalvirtual.valor_ventas_del_dia(self) - Sucursalvirtual.gastos_por_dia(self,500)
+        return self.valor_ventas_del_dia() - self.gastos_por_dia()
+
+    def asignar_valor_gastos_fijo_por_dia(self,valor):
+        self.gastos_fijo_por_dia = valor
+
+
+class Sucursalfisica(Sucursal):
+    def __init__(self):
+        self.productos = []
+        self.ventas = [] 
+        self.valor_fijo_diario = 500
+
+
+def ganancias_total_por_dia(self):
+        return self.valor_ventas_del_dia() - self.valor_fijo_diario
+
+def cantidad_de_ventas_del_dia(self):
+        self.ventas
+        ventas_por_dia= [venta for venta in self.ventas if dia in venta["fecha"]]
+        return len(ventas_por_dia)
+
+
 
 class Nueva:
     def precio(self, precio_base):
