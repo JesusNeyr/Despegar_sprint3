@@ -1,13 +1,6 @@
-from ast import Num, Str
-from calendar import c
+from ast import Raise
 from datetime import date
-from math import prod
-from multiprocessing.dummy import Value
-
 from operator import itemgetter
-from tokenize import Number
-
-
 
 fecha_anio_actual=date.strftime(date.today(), "%Y")
 dia =date.strftime(date.today(), "%Y-%m-%d")
@@ -17,7 +10,7 @@ dia =date.strftime(date.today(), "%Y-%m-%d")
 class Producto:
     def __init__(self, nombre, categoria, codigo, precio_base):
         self.nombre = nombre
-        self.categoria = categoria
+        self.categoria = [categoria]
         self.codigo = codigo
         self.precio_base = precio_base
         self.stock=0
@@ -33,41 +26,52 @@ class Producto:
 
         return self.codigo
 
-    def consultar_categoria(self,consultar_categoria):
-        return consultar_categoria.lower() in self.categoria
-
-    def agregar_categoria(self,nueva_categoria):
-        #hacer un for y retornar true o false, aplicar lower a la variable de parametro y al atributo
-        self.categoria.append(nueva_categoria)
     def retornar_precio(self):
         return self.precio_base
 
+    def retornar_stock(self):
+
+        return self.stock
+
     def calcular_precio_final(self,es_extranjero):
-        if self.precio(self) > 70 and es_extranjero:
+        if self.precio() > 70 and es_extranjero:
             
-            return self.precio(self)
+            return self.precio()
         
         else:
             
-            return self.precio(self) + self.precio(self) * 0.21
+            return self.precio() + (self.precio() * 0.21)
 
-    def actualizar_precio_(self,porcentaje):
+    def actualizar_precio_por_porcentaje(self,porcentaje):
         self.precio_base +=self.precio_base*porcentaje/100
+    
+    def es_de_nombre(self,expresion_del_nombre):
 
-    #crear actualizar_precio_por_nombre(), recibe nombre y porcentaje
-        #hace lo mismo que actualizar asi que se copia
-     
-    # ojo que si vemos estos dos metodos son iguales asi que seria mejor hace un 
-    #actualizar_segun_critero(), recibiendo un criterio  y un %
-    #dentro se mapea y se filtra
-#estos criterios seran clases, por nombre y por categoria
-#enviando el msj si corresponde al producto
-#en nombre, se hace el constructor de nombre donde estara la expresion regular
-#en categoria, los mismo pero tiene un atributo de categoria
+        return re.search(expresion_del_nombre,self.nombre)
+
+    def consultar_categoria(self,consultar_categoria):
+        for categoria in self.categoria:
+            if categoria.lower()== consultar_categoria.lower():
+                return True
+            else:
+                return False
+    
+    def agregar_categoria(self,nueva_categoria):
+        self.categoria.append(nueva_categoria)
+
+    def recargar_stock(self,cantidad):
+        
+        self.stock = self.stock + int(cantidad)
 class PorNombre:
-    def __init__(self):
-        pass
-class PorCategoria
+    def __init__(self,expresion_del_nombre):
+        self.expresion_del_nombre=f'{expresion_del_nombre}+[\s]?[a-zA-Z]?+'
+    def corresponde_al_producto(self,producto):
+        return producto.es_de_nombre(self.expresion_del_nombre.split())
+class PorCategoria:
+    def __init__(self,categoria):
+        self.categoria=categoria
+    def corresponde_al_producto(self,producto):
+        return producto.consultar_categoria(self.categoria)
 
 
 class Sucursal:
@@ -77,11 +81,11 @@ class Sucursal:
         if len(self.productos)==0:       
             codigos=[]
         else:
-            [codigos.append(producto.codigo) for producto in self.productos if  producto.codigo]
+            [codigos.append(producto.codigo) for producto in self.productos if  producto.codigo and type(producto.codigo)==int and producto.codigo>0]
         return codigos
     
     def codigos_ordenados_decreciente_de_productos(self):
-        return sorted(self.codigos_productos(self),reverse=True)
+        return sorted(self.codigos_productos(),reverse=True)
     
     def lista_de_codigos_ventas(self):   
         codigos=[]
@@ -97,17 +101,17 @@ class Sucursal:
 
     def codigo_de_producto_solicitado_en_productos(self,codigo):
         
-        return codigo in self.codigos_productos(self)
+        return codigo in self.codigos_productos()
 
-    def posicion_de_codigo_ordenado_decre_de_productos(self,codigo_de_producto):
+    def posicion_de_codigo_en_productos(self,codigo_de_producto):
 
-        if self.codigo_de_producto_solicitado_en_productos(self,codigo_de_producto):
-                    return self.codigos_productos(self).index(codigo_de_producto)
+        if self.codigo_de_producto_solicitado_en_productos(codigo_de_producto):
+                    return self.codigos_productos().index(codigo_de_producto)
         else:
-            raise ValueError("Lo sentimos el producto que desea no se encuetra")
+            raise ValueError("Lo sentimos el producto consultado, no existe")
 
     def buscar_producto(self,codigo_de_producto):
-        if self.codigo_de_producto_solicitado_en_productos(self,codigo_de_producto):
+        if self.codigo_de_producto_solicitado_en_productos(codigo_de_producto):
             for producto in self.productos:
                 if codigo_de_producto ==producto.codigo:
                             return producto
@@ -120,10 +124,10 @@ class Sucursal:
             self.productos.append(producto_nuevo)
         else:
        
-            if producto_nuevo.retornar_codigo() in self.codigos_productos():
+            if (producto_nuevo.retornar_codigo() in self.codigos_productos()) :
 
                 raise ValueError("producto registrado")
-            
+
             else:
                 
                 self.productos.append(producto_nuevo)
@@ -132,71 +136,88 @@ class Sucursal:
     
         for producto in self.productos:
         
-            if self.codigo_de_producto_solicitado_en_productos(self,codigo_de_producto):
+            if self.codigo_de_producto_solicitado_en_productos(codigo_de_producto):
             
                 if producto.codigo == codigo_de_producto:
                 
-                    producto.stock += cantidad
+                    producto.recargar_stock(cantidad)
                 
             else:
             
                 raise ValueError("No se encuentra el producto")
 
-    def hay_stock(self,codigo_producto):
+    def hay_stock(self,codigo_de_producto):
 
+        lista_de_codigos=self.codigos_productos()
     
-    
-        lista_de_codigos=self.codigos_productos(self)
-    
-        posicion=self.posicion_de_codigo_ordenado_decre_de_productos(self,codigo_producto)
-    
+        
+        
+        if self.codigo_de_producto_solicitado_en_productos(codigo_de_producto):
+                    posicion= lista_de_codigos.index(codigo_de_producto)
+            
+        if codigo_de_producto in lista_de_codigos:
 
-        if codigo_producto in lista_de_codigos:
-
-            return self.productos[posicion].codigo == codigo_producto and self.productos[posicion].stock > 0
+            return self.productos[posicion].codigo == codigo_de_producto and self.productos[posicion].stock > 0
     
     def mostrar(self):
         for i in self.productos:
-            print(f'nombre del producto {i.nombre}, stock = {i.stock},codigo = {i.codigo}')
+            print(f'nombre del producto {i.nombre}, stock = {i.stock},codigo = {i.codigo},precio={i.precio_base}')
     
     def calcular_precio_final(self,codigo,es_extranjero):
-        producto_encontrado=self.buscar_producto(self,codigo)
+
+        producto_encontrado=self.buscar_producto(codigo)
+
         return producto_encontrado.calcular_precio_final(es_extranjero)
+    
+    def agregar_categoria(self,codigo,categoria):
+
+        for producto in self.productos:
+            if producto.codigo==codigo:
+                producto.agregar_categoria(categoria)
+    
+
 
     def contar_categorias(self):
         
         categorias_unicas=[]
+
         for producto in self.productos:
-            [categorias_unicas.append(producto.categoria) for producto in self.productos if producto.categoria not in categorias_unicas]       
+            
+            for categoria in producto.categoria:
+                
+                if categoria not in categorias_unicas:
+
+                    categorias_unicas.append(categoria)
+
         return len(categorias_unicas)
 
     def realizar_venta(self,producto_vendido,cantidad,es_extranjero):
         
-        if producto_vendido.codigo>0:
+        if producto_vendido.stock>0 and producto_vendido.codigo>0:
             self.ventas.append( {
                 
                         "codigo_producto": producto_vendido.codigo,
                         "cantidad": cantidad,       
                         "fecha": date.strftime(date.today(), "%Y-%m-%d"),
-                        "precio": self.calcular_precio_final(self,producto_vendido.codigo,es_extranjero) * cantidad
-                        })
+                        "precio": self.calcular_precio_final(producto_vendido.codigo,es_extranjero) * cantidad
+                        })        
         
     def realizar_compra(self,codigo_de_producto, cantidad,es_extranjero):
         
-        posicion=Sucursal.posicion_de_codigo_ordenado_decre_de_productos(self,codigo_de_producto)
+        posicion=self.posicion_de_codigo_en_productos(codigo_de_producto)
         
-        if self.hay_stock(codigo_de_producto) and cantidad <= self.productos[posicion].stock:
+        if self.hay_stock(codigo_de_producto) and cantidad <= self.productos[posicion].retornar_stock():
             
-                self.productos[posicion].stock-= cantidad
+                self.productos[posicion].recargar_stock(cantidad)
                 
-                Sucursal.realizar_venta(self,self.productos[posicion],cantidad,es_extranjero)
+                self.realizar_venta(self.productos[posicion],cantidad,es_extranjero)
                 
         else:
                 raise ValueError("No hay stock Disponible, cantidad dispoble de " + str(self.productos[posicion].stock))
         
     def discontinuar_productos(self):
 
-        self.productos=[producto for producto in self.productos if producto.codigo>0]
+        self.productos=[producto for producto in self.productos if producto.stock>0]
     
     def valor_ventas_del_dia(self):
     
@@ -211,10 +232,12 @@ class Sucursal:
         return suma_ventas
 
     def ventas_del_anio(self):
+
         lista_de_ventas_del_anio = []
+
         for venta in self.ventas:
             
-            if venta.fecha[0:4] == fecha_anio_actual:
+            if venta["fecha"][0:4] == fecha_anio_actual:
                 
                 lista_de_ventas_del_anio.append(venta)
                 
@@ -240,11 +263,21 @@ class Sucursal:
                         
         return cantidad_repetida_de_codigo_vendidos
 
-    def productos_mas_vendidos_ordenados(self,codigos_ordenados_por_ventas):
+    def codigos_ordenados_de_las_ventas(self):
+
+        codigos_ordenados_de_productos_decre=self.codigos_ordenados_decreciente_de_productos()
         
+        cantidad_repetida_de_codigo_vendidos= self.cantidad_de_codigo_con_ventas(codigos_ordenados_de_productos_decre)
+
+        lista_ordenada = sorted(cantidad_repetida_de_codigo_vendidos.items(), key=itemgetter(1),reverse=True)
+
+        return lista_ordenada
+
+    def productos_mas_vendidos_ordenados(self,codigos_ordenados_por_ventas):
         
         nombre_productos = []
         
+
         for codigo in codigos_ordenados_por_ventas:
             
             for producto in self.productos:
@@ -255,45 +288,35 @@ class Sucursal:
                     
         return nombre_productos
 
-    def productos_mas_vendidos(self,hasta=-1):
+    def productos_mas_vendidos(self,hasta = -1):
                
         if len(self.ventas) <= hasta:
             
             raise ValueError("cantidad solicitada excedida")
-        
-        codigos_ordenados_de_productos_decre=Sucursal.codigos_ordenados_decreciente_de_productos(self)
-        
-        cantidad_repetida_de_codigo_vendidos= Sucursal.cantidad_de_codigo_con_ventas(self,codigos_ordenados_de_productos_decre)
-        
-        codigos_ordenados_por_ventas=sorted(cantidad_repetida_de_codigo_vendidos.items(), key=itemgetter(1),reverse=True)
-        
-        nombre_productos=Sucursal.productos_mas_vendidos_ordenados(self,codigos_ordenados_por_ventas)
+
+        codigos_ordenados_por_ventas=self.codigos_ordenados_de_las_ventas()
+
+        nombre_productos=self.productos_mas_vendidos_ordenados(codigos_ordenados_por_ventas)
         
         if hasta!=-1:
             return nombre_productos[:hasta]
         else:
             return nombre_productos
 
-#esto deberia ser en producto, por que cada producto se debe actualizar no desde sucursal
+    def actualizar_precio_segun(self,criterio,porcentaje):
+        for producto in self.productos:
+            if criterio.corresponde_al_producto(producto):
+                producto.actualizar_precio_por_porcentaje(porcentaje)
 
+    def actualizar_precios_por_nombre(self,nombre, porcentaje):
+
+        self.actualizar_precios_segun(PorNombre(nombre),porcentaje)
+    
     def actualizar_precios_por_categoria(self,categoria, porcentaje):
 
-        for producto in self.productos:
-            if producto.consultar_categoria(categoria):
-                producto.actualizar_precio(porcentaje)
-        # if type(porcentaje)==int:
-        
-        #     for producto in self.productos:
-
-        #         precio_de_producto = producto.retornar_precio()
-
-        #         if producto.categoria == categoria.lower():
-                    
-        #             producto.precio_base = precio_de_producto + ( precio_de_producto * porcentaje/100)
-        # else:
-
-        #     raise ValueError("Porcentaje no recibe cadena de texto, solo numeros")
-
+        self.actualizar_precio_segun(PorCategoria(categoria),porcentaje)
+    
+   
 class Sucursalvirtual(Sucursal):
     def __init__(self) :
         self.productos = []
@@ -326,10 +349,7 @@ class Sucursalfisica(Sucursal):
 def ganancias_total_por_dia(self):
         return self.valor_ventas_del_dia() - self.valor_fijo_diario
 
-def cantidad_de_ventas_del_dia(self):
-        self.ventas
-        ventas_por_dia= [venta for venta in self.ventas if dia in venta["fecha"]]
-        return len(ventas_por_dia)
+
 
 class Nueva:
     def precio(self, precio_base):
@@ -345,11 +365,4 @@ class Promocion:
 
     def precio(self, precio_base):
         return precio_base - self.valor_fijo
-
-macowin = Sucursalvirtual()
-pantalon= Producto("pantalon","ROPA",100,5000)
-remera = Producto("remera", "ropa", 101, 2000)
-macowin.registrar_producto(pantalon)
-macowin.registrar_producto(remera)
-print(macowin.productos)
 
